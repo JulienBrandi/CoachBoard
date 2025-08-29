@@ -1,0 +1,92 @@
+<div class="players-container">
+  <h2>Liste des Joueurs</h2>
+  
+  <!-- Add Button -->
+  <div class="actions">
+    <button class="btn-primary" (click)="addPlayer()" *ngIf="!showForm">
+      ➕ Ajouter un nouveau joueur
+    </button>
+  </div>
+
+  <!-- Overlay to add Player -->
+  <div class="modal-overlay" *ngIf="showForm" (click)="cancelForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Ajouter un nouveau joueur</h3>
+        <button type="button" class="close-btn" (click)="cancelForm()">✕</button>
+      </div>
+      
+      <form (ngSubmit)="savePlayer()" class="modal-form">
+        <div class="form-group">
+          <label for="name">Nom :</label>
+          <input 
+            type="text" 
+            id="name" 
+            [(ngModel)]="newPlayer.name" 
+            name="name" 
+            required
+            placeholder="Nom du joueur">
+        </div>
+
+        <div class="form-group">
+          <label for="age">Âge :</label>
+          <input 
+            type="number" 
+            id="age" 
+            [(ngModel)]="newPlayer.age" 
+            name="age" 
+            min="16" 
+            max="50" 
+            required
+            placeholder="Âge">
+        </div>
+
+        <div class="form-group">
+          <label for="position">Poste(s) :</label>
+          <div class="checkbox-list">
+            <div *ngFor="let pos of positions; let i = index" class="checkbox-item">
+              <label [for]="'pos' + i">{{ pos }}</label>
+              <input 
+                type="checkbox" 
+                [id]="'pos' + i"
+                [value]="pos"  
+                [checked]="newPlayer.position.includes(pos)"
+                (change)="onPositionChange($event, pos)">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-success">💾 Sauvegarder</button>
+          <button type="button" class="btn-cancel" (click)="cancelForm()">❌ Annuler</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Players Table -->
+  <table class="players-table">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Âge</th>
+        <th>Poste</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let player of players">
+        <td>{{ player.name }}</td>
+        <td>{{ player.age }} ans</td>
+        <td>{{ player.position.join(', ') }}</td>
+        <td>
+          <button class="btn-danger" (click)="deletePlayer(player.id)">🗑️ Supprimer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="players.length === 0" class="no-players">
+    <p>Aucun joueur dans l'équipe. Ajoutez-en un !</p>
+  </div>
+</div>
