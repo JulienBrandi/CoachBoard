@@ -5,7 +5,7 @@ import coachboard.project.backend.services.PlayerService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class PlayerController {
 
@@ -27,6 +27,12 @@ public class PlayerController {
 
     @PostMapping("player")
     public void addPlayer(@RequestBody PlayerDTO playerDTO){
+        System.out.println("Received PlayerDTO: " + playerDTO);
         playerService.savePlayer(playerDTO);
+    }
+
+    @PutMapping("player/{id}")
+    public void modifyPlayer(@RequestBody PlayerDTO playerDTO, @PathVariable Long id){
+        playerService.updatePlayer(playerDTO, id);
     }
 }

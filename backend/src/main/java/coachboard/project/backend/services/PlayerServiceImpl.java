@@ -31,6 +31,18 @@ public class PlayerServiceImpl implements PlayerService{
     }
 
     @Override
+    public PlayerDTO updatePlayer(PlayerDTO playerDTO, Long id) {
+        Player existingPlayer = playerRepository.findById(id).orElseThrow(() -> new RuntimeException("Player not found"));
+        existingPlayer = playerMapper.toEntity(playerDTO);
+        return playerMapper.toDTO(playerRepository.save(existingPlayer));
+    }
+
+    @Override
+    public void deletePlayer(Long id) {
+        playerRepository.deleteById(id);
+    }
+
+    @Override
     public List<PlayerDTO> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
         return players.stream().map(playerMapper::toDTO).toList();

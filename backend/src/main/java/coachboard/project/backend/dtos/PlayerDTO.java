@@ -9,5 +9,5 @@ import java.util.List;
 public class PlayerDTO {
     private String name;
     private int age;
-    private List<Position> positions;
+    private List<String> positions;
 }

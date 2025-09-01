@@ -2,7 +2,10 @@ package coachboard.project.backend.mappers;
 
 import coachboard.project.backend.dtos.PlayerDTO;
 import coachboard.project.backend.entities.Player;
+import coachboard.project.backend.entities.Position;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
 
 @Component
 public class PlayerMapper {
@@ -11,7 +14,12 @@ public class PlayerMapper {
         PlayerDTO playerDTO = new PlayerDTO();
         playerDTO.setName(player.getName());
         playerDTO.setAge(player.getAge());
-        playerDTO.setPositions(player.getPositions());
+        playerDTO.setPositions(
+                player.getPositions()
+                        .stream()
+                        .map(Enum::name)
+                        .collect(Collectors.toList())
+        );
         return playerDTO;
     }
 
@@ -19,7 +27,12 @@ public class PlayerMapper {
         Player player = new Player();
         player.setName(playerDTO.getName());
         player.setAge(playerDTO.getAge());
-        player.setPositions(playerDTO.getPositions());
+        System.out.println(playerDTO.getPositions());
+        player.setPositions(
+                playerDTO.getPositions()
+                        .stream()
+                        .map(Position::valueOf) // "GK" -> Position.GK
+                        .collect(Collectors.toList()));
         return player;
     }
 
