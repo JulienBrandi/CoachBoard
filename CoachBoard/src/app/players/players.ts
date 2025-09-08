@@ -1,54 +1,61 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import as from '@angular/common/locales/extra/as';
+import { error } from 'console';
 
 
 interface Player {
   id: number;
   name: string;
   age: number;
-  position: string[];
+  positions: string[];
 }
 
 @Component({
   selector: 'app-players',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './players.html',
   styleUrl: './players.css'
 })
 export class Players {
-  protected players: Player[] = [
-    { id: 1, name: 'Lionel Messi', age: 36, position: ['Attaquant'] },
-    { id: 2, name: 'Luka Modric', age: 38, position: ['Milieu'] },
-    { id: 3, name: 'Sergio Ramos', age: 37, position: ['Défenseur'] }
-  ];
+  protected players: Player[] = [];
+
+  constructor(private http: HttpClient) {
+    this.fetchPlayers();
+  }
+
+  protected fetchPlayers() {
+    this.http.get<Player[]>('http://localhost:8080/players')
+      .subscribe(players => {
+        this.players = players;
+        console.log(this.players);
+      });
+  }
 
   // État du formulaire
   protected showForm = false;
   protected newPlayer: Omit<Player, 'id'> = {
     name: '',
     age: 0,
-    position: [] as string[]
+    positions: [] as string[]
   };
+  protected idPlayersEdited = 0;
 
   // Options pour le poste
-  protected positions = [
-    'Gardien',
-    'Défenseur central',
-    'Défenseur Gauche',
-    'Défenseur Droit',
-    'Milieu défensif',
-    'Milieu central',
-    'Milieu offensif',
-    'Ailier Droit',
-    'Ailier Gauche',
-    'Attaquant'
+  protected positions = [  
+    { alias: "GK", label: "Gardien" },
+    { alias: "DG", label: "Défenseur Gauche" },
+    { alias: "DC", label: "Défenseur Central" },
+    { alias: "DD", label: "Défenseur Droit" },
+    { alias: "MD", label: "Milieu Défensif" },
+    { alias: "MC", label: "Milieu Central" },
+    { alias: "MO", label: "Milieu Offensif" },
+    { alias: "AiG", label: "Ailier Gauche" },
+    { alias: "AiD", label: "Ailier Droit" },
+    { alias: "BU", label: "Buteur" }
   ];
-
-  constructor() {
-    // Initialisation ou récupération des données des joueurs
-  }
 
   protected addPlayer() {
     this.showForm = true;
@@ -57,22 +64,37 @@ export class Players {
   protected onPositionChange(event: Event, position: string) {
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
-      if (!this.newPlayer.position.includes(position)) {
-        this.newPlayer.position.push(position);
+      if (!this.newPlayer.positions.includes(position)) {
+        this.newPlayer.positions.push(position);
       }
     } else {
-      this.newPlayer.position = this.newPlayer.position.filter(pos => pos !== position);
+      this.newPlayer.positions = this.newPlayer.positions.filter(pos => pos !== position);
     }
   }
 
   protected savePlayer() {
-    if (this.newPlayer.name && this.newPlayer.age > 0 && this.newPlayer.position) {
-      const player: Player = {
-        id: Math.max(...this.players.map(p => p.id)) + 1,
-        ...this.newPlayer
-      };
-      this.players.push(player);
-      this.cancelForm();
+    if(this.idPlayersEdited > 0) {
+      console.log('Player updated:', this.newPlayer);
+      this.http.put<Player>(`http://localhost:8080/player/${this.idPlayersEdited}`, this.newPlayer)
+        .subscribe({
+          next: (player) => {
+            this.fetchPlayers();
+            this.cancelForm();
+            this.idPlayersEdited = 0;
+          }
+        });
+    } else if (this.newPlayer.name && this.newPlayer.age > 0 && this.newPlayer.positions.length > 0) {
+        console.log('Player saved:', this.newPlayer);
+        this.http.post<Player>('http://localhost:8080/player', this.newPlayer)
+          .subscribe({
+            next: (player) => {
+            this.fetchPlayers();
+            this.cancelForm();
+          },
+          error: (err) => {
+            console.error('Error saving player:', err);
+          }
+        });
     }
   }
 
@@ -81,11 +103,30 @@ export class Players {
     this.newPlayer = {
       name: '',
       age: 0,
-      position: ['']
+      positions: []
+      };
+  }
+
+  protected editPlayer(player: Player) {
+    this.showForm = true;
+    this.newPlayer = {
+      name: player.name,
+      age: player.age,
+      positions: [...player.positions]
     };
+    this.idPlayersEdited = player.id;
   }
 
   protected deletePlayer(id: number) {
-    this.players = this.players.filter(player => player.id !== id);
+    this.http.delete(`http://localhost:8080/player/${id}`)
+      .subscribe({
+        next: () => {
+          this.players = this.players.filter(player => player.id !== id);
+          console.log(`Player with id ${id} deleted.`);
+        },
+        error: (err) => {
+          console.error('Error deleting player:', err);
+        }
+      });
   }
 }

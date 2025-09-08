@@ -16,53 +16,52 @@
         <button type="button" class="close-btn" (click)="cancelForm()">✕</button>
       </div>
       
-      <form (ngSubmit)="savePlayer()" class="modal-form">
-        <div class="form-group">
-          <label for="name">Nom :</label>
-          <input 
-            type="text" 
-            id="name" 
-            [(ngModel)]="newPlayer.name" 
-            name="name" 
-            required
-            placeholder="Nom du joueur">
-        </div>
+    <form (ngSubmit)="savePlayer(); $event.preventDefault()" class="modal-form">
+      <div class="form-group">
+        <label for="name">Nom :</label>
+        <input 
+          type="text" 
+          id="name" 
+          [(ngModel)]="newPlayer.name" 
+          name="name" 
+          required
+          placeholder="Nom du joueur">
+      </div>
 
-        <div class="form-group">
-          <label for="age">Âge :</label>
-          <input 
-            type="number" 
-            id="age" 
-            [(ngModel)]="newPlayer.age" 
-            name="age" 
-            min="16" 
-            max="50" 
-            required
-            placeholder="Âge">
-        </div>
+      <div class="form-group">
+        <label for="age">Âge :</label>
+        <input 
+          type="number" 
+          id="age" 
+          [(ngModel)]="newPlayer.age" 
+          name="age" 
+          required
+          placeholder="Âge">
+      </div>
 
-        <div class="form-group">
-          <label for="position">Poste(s) :</label>
-          <div class="checkbox-list">
-            <div *ngFor="let pos of positions; let i = index" class="checkbox-item">
-              <label [for]="'pos' + i">{{ pos }}</label>
-              <input 
-                type="checkbox" 
-                [id]="'pos' + i"
-                [value]="pos"  
-                [checked]="newPlayer.position.includes(pos)"
-                (change)="onPositionChange($event, pos)">
-            </div>
+      <div class="form-group">
+        <label for="position">Poste(s) :</label>
+        <div class="checkbox-list">
+          <div *ngFor="let pos of positions; let i = index" class="checkbox-item">
+            <label [for]="'pos' + i">{{ pos.label }}</label>
+            <input 
+              type="checkbox" 
+              [id]="'pos' + i"
+              [value]="pos.alias"  
+              [checked]="newPlayer.positions.includes(pos.alias)"
+              (change)="onPositionChange($event, pos.alias)">
           </div>
         </div>
+      </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn-success">💾 Sauvegarder</button>
-          <button type="button" class="btn-cancel" (click)="cancelForm()">❌ Annuler</button>
-        </div>
-      </form>
-    </div>
+      <div class="form-actions">
+        <!-- bouton submit (pas button normal) -->
+        <button type="submit" class="btn-success">💾 Sauvegarder</button>
+        <button type="button" class="btn-cancel" (click)="cancelForm()">❌ Annuler</button>
+      </div>
+    </form>
   </div>
+</div>
 
   <!-- Players Table -->
   <table class="players-table">
@@ -78,8 +77,9 @@
       <tr *ngFor="let player of players">
         <td>{{ player.name }}</td>
         <td>{{ player.age }} ans</td>
-        <td>{{ player.position.join(', ') }}</td>
+        <td>{{ player.positions ? player.positions.join(', ') : '' }}</td>
         <td>
+          <button class="btn-edit" (click)="editPlayer(player)">✏️ Modifier</button>
           <button class="btn-danger" (click)="deletePlayer(player.id)">🗑️ Supprimer</button>
         </td>
       </tr>
