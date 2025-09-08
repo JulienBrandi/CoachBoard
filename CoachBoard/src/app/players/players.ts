@@ -41,6 +41,7 @@ export class Players {
     age: 0,
     positions: [] as string[]
   };
+  protected idPlayersEdited = 0;
 
   // Options pour le poste
   protected positions = [  
@@ -72,21 +73,22 @@ export class Players {
   }
 
   protected savePlayer() {
-    /*if (this.newPlayer.name && this.newPlayer.age > 0 && this.newPlayer.position) {
-      const player: Player = {
-        id: Math.max(...this.players.map(p => p.id)) + 1,
-        ...this.newPlayer
-      };
-      this.players.push(player);
-      this.cancelForm();
-    }*/
-
-    if (this.newPlayer.name && this.newPlayer.age > 0 && this.newPlayer.positions.length > 0) {
-      console.log('Player saved:', this.newPlayer);
-      this.http.post<Player>('http://localhost:8080/player', this.newPlayer)
+    if(this.idPlayersEdited > 0) {
+      console.log('Player updated:', this.newPlayer);
+      this.http.put<Player>(`http://localhost:8080/player/${this.idPlayersEdited}`, this.newPlayer)
         .subscribe({
           next: (player) => {
-            this.fetchPlayers(); // Re-fetch the players to get the updated list
+            this.fetchPlayers();
+            this.cancelForm();
+            this.idPlayersEdited = 0;
+          }
+        });
+    } else if (this.newPlayer.name && this.newPlayer.age > 0 && this.newPlayer.positions.length > 0) {
+        console.log('Player saved:', this.newPlayer);
+        this.http.post<Player>('http://localhost:8080/player', this.newPlayer)
+          .subscribe({
+            next: (player) => {
+            this.fetchPlayers();
             this.cancelForm();
           },
           error: (err) => {
@@ -102,10 +104,29 @@ export class Players {
       name: '',
       age: 0,
       positions: []
+      };
+  }
+
+  protected editPlayer(player: Player) {
+    this.showForm = true;
+    this.newPlayer = {
+      name: player.name,
+      age: player.age,
+      positions: [...player.positions]
     };
+    this.idPlayersEdited = player.id;
   }
 
   protected deletePlayer(id: number) {
-    this.players = this.players.filter(player => player.id !== id);
+    this.http.delete(`http://localhost:8080/player/${id}`)
+      .subscribe({
+        next: () => {
+          this.players = this.players.filter(player => player.id !== id);
+          console.log(`Player with id ${id} deleted.`);
+        },
+        error: (err) => {
+          console.error('Error deleting player:', err);
+        }
+      });
   }
 }

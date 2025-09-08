@@ -12,6 +12,7 @@ public class PlayerMapper {
 
     public PlayerDTO toDTO(Player player) {
         PlayerDTO playerDTO = new PlayerDTO();
+        playerDTO.setId(player.getId());
         playerDTO.setName(player.getName());
         playerDTO.setAge(player.getAge());
         playerDTO.setPositions(
@@ -25,9 +26,10 @@ public class PlayerMapper {
 
     public Player toEntity(PlayerDTO playerDTO) {
         Player player = new Player();
+        if(playerDTO.getId() != 0)
+            player.setId(playerDTO.getId());
         player.setName(playerDTO.getName());
         player.setAge(playerDTO.getAge());
-        System.out.println(playerDTO.getPositions());
         player.setPositions(
                 playerDTO.getPositions()
                         .stream()

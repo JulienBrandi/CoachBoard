@@ -2,11 +2,13 @@ package coachboard.project.backend.services;
 
 import coachboard.project.backend.dtos.PlayerDTO;
 import coachboard.project.backend.entities.Player;
+import coachboard.project.backend.entities.Position;
 import coachboard.project.backend.mappers.PlayerMapper;
 import coachboard.project.backend.repositories.PlayerRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerServiceImpl implements PlayerService{
@@ -33,7 +35,13 @@ public class PlayerServiceImpl implements PlayerService{
     @Override
     public PlayerDTO updatePlayer(PlayerDTO playerDTO, Long id) {
         Player existingPlayer = playerRepository.findById(id).orElseThrow(() -> new RuntimeException("Player not found"));
-        existingPlayer = playerMapper.toEntity(playerDTO);
+        existingPlayer.setName(playerDTO.getName());
+        existingPlayer.setAge(playerDTO.getAge());
+        existingPlayer.setPositions(
+                playerDTO.getPositions()
+                        .stream()
+                        .map(Position::valueOf) // "GK" -> Position.GK
+                        .collect(Collectors.toList()));
         return playerMapper.toDTO(playerRepository.save(existingPlayer));
     }
 

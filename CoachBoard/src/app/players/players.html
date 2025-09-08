@@ -35,8 +35,6 @@
           id="age" 
           [(ngModel)]="newPlayer.age" 
           name="age" 
-          min="16" 
-          max="50" 
           required
           placeholder="Âge">
       </div>
@@ -81,6 +79,7 @@
         <td>{{ player.age }} ans</td>
         <td>{{ player.positions ? player.positions.join(', ') : '' }}</td>
         <td>
+          <button class="btn-edit" (click)="editPlayer(player)">✏️ Modifier</button>
           <button class="btn-danger" (click)="deletePlayer(player.id)">🗑️ Supprimer</button>
         </td>
       </tr>
